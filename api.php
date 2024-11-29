@@ -6,18 +6,15 @@ header('Content-Type: application/json');
 $file_path = __DIR__ . "/devices.json";
 
 // Utility functions
+
 function readDevices() {
     global $file_path;
-    if (file_exists($file_path)) {
-        $json = file_get_contents($file_path);
-        return json_decode($json, true);
-    }
-    return [];
+    return file_exists($file_path) ? json_decode(file_get_contents($file_path), true) : [];
 }
 
 function writeDevices($devices) {
     global $file_path;
-    file_put_contents($file_path, json_encode(array_values($devices), JSON_PRETTY_PRINT));
+    file_put_contents($file_path, json_encode($devices, JSON_PRETTY_PRINT));
 }
 
 // Check endpoint
@@ -31,16 +28,18 @@ if ($endpoint === "/api/devices" && $_SERVER["REQUEST_METHOD"] === "GET") {
 if ($endpoint === "/api/devices" && $_SERVER["REQUEST_METHOD"] === "POST") {
     $action = $_POST["action"] ?? null;
     $devices = readDevices();
-    
+
     if ($action === "add") {
         $name = $_POST["name"];
         $ip = $_POST["ip"];
-        $devices[] = ["name" => $name, "ip" => $ip];
+        $devices[$name] = $ip; // Store as Key-Value pair
         writeDevices($devices);
     } elseif ($action === "delete") {
-        $index = $_POST["index"];
-        unset($devices[$index]);
-        writeDevices($devices);
+        $name = $_POST["name"];
+        if (isset($devices[$name])) {
+            unset($devices[$name]); // Remove by name
+            writeDevices($devices);
+        }
     }
 
     echo json_encode(["status" => "success"]);

@@ -1,8 +1,11 @@
 RewriteEngine On
 
-# If the requested file or directory exists, serve it directly
+# Route /api/devices to api.php
+RewriteRule ^devices$ api.php [L]
+
+# Allow direct access to other files (like devices.json)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Otherwise, redirect everything to your router script
+# Fallback to api.php for other requests
 RewriteRule ^ api.php [L]
